@@ -5,6 +5,7 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/gofiber/fiber/v2"
 	"log"
+	"net/http"
 )
 
 type Comment struct {
@@ -52,11 +53,12 @@ func PushCommentToQueue(topic string, message []byte) error {
 	return nil
 }
 
+//TODO: Response will be convert to struct
 func createComment(ctx *fiber.Ctx) error {
 	cmt := new(Comment)
 	if err := ctx.BodyParser(cmt); err != nil {
 		log.Println(err)
-		ctx.Status(400).JSON(&fiber.Map{
+		ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
 			"success": false,
 			"message": err,
 		})
@@ -71,7 +73,7 @@ func createComment(ctx *fiber.Ctx) error {
 		"comment": cmt,
 	})
 	if err != nil {
-		ctx.Status(500).JSON(&fiber.Map{
+		ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"success": false,
 			"message": "Error creating product",
 		})
